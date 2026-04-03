@@ -1,0 +1,6 @@
+# Generated artifacts
+*.skill
+prompting-buddy-workspace/
+
+# OS
+.DS_Store

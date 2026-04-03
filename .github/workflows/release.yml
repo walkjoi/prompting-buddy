@@ -1,0 +1,41 @@
+name: Build & Release .skill
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "SKILL.md"
+      - "references/**"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build .skill archive
+        run: ./scripts/build-skill.sh prompting-buddy.skill
+
+      - name: Generate version tag
+        id: version
+        run: |
+          # Use date-based versioning: v2026.04.03-<short-sha>
+          TAG="v$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          gh release create "$TAG" \
+            prompting-buddy.skill \
+            --title "prompting-buddy $TAG" \
+            --notes "Auto-built from $(git rev-parse --short HEAD).
+
+          Install: download \`prompting-buddy.skill\` and run \`/skill install prompting-buddy.skill\` in Claude Code." \
+            --latest

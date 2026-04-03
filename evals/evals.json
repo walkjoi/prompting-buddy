@@ -1,0 +1,23 @@
+{
+  "skill_name": "prompting-buddy",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I just started a new TypeScript + React project with Vite. We use pnpm, vitest for testing, and biome for linting. The project is at early stage with just a few components. Can you help me set up a CLAUDE.md so Claude knows how to work with this project?",
+      "expected_output": "A concise CLAUDE.md file under 200 lines with pnpm/vitest/biome commands, TypeScript conventions, React patterns, and verification instructions. Should not teach TypeScript basics.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "We have a large Python monorepo with 3 services: api-gateway (FastAPI), ml-pipeline (PyTorch), and data-ingestion (Airflow). Each service has its own test suite and different coding conventions. The api-gateway uses black+ruff, ml-pipeline uses a more relaxed style. We deploy via GitHub Actions. I need CLAUDE.md plus rules files scoped to each service, and maybe an agent for code review.",
+      "expected_output": "Multiple files: a root CLAUDE.md under 200 lines with shared conventions, path-scoped .claude/rules/ files for each service, and a code-reviewer agent definition. Rules should reflect the different conventions per service.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I already have this CLAUDE.md but Claude keeps ignoring the testing instructions and the file feels bloated. Can you review and fix it?\n\n```\n# Project\nThis is a Go microservice for processing payments.\n\n# Build\ngo build ./...\n\n# Test\ngo test ./...\nALWAYS run tests before committing.\nALWAYS run tests after making changes.\nNEVER skip tests.\nIMPORTANT: Tests must pass.\nCRITICAL: Do not commit without testing.\n\n# Code Style\nWe use Go. Follow Go conventions. Write clean code. Use proper error handling. Make sure your code is readable. Don't write bad code. Always use meaningful variable names. Follow the Go style guide. Use gofmt. Use golangci-lint.\n\n# Architecture\nThe project uses a hexagonal architecture pattern. The domain logic is in internal/domain/. The ports are in internal/ports/. The adapters are in internal/adapters/. The HTTP handlers are in internal/adapters/http/. The database adapters are in internal/adapters/postgres/. The service layer is in internal/service/. The configuration is in internal/config/. The main entry point is in cmd/server/main.go. The migrations are in migrations/. The API specs are in api/.\n\n# Database\nWe use PostgreSQL. Migrations are managed with golang-migrate. Run migrations with: migrate -path migrations -database $DATABASE_URL up\n\n# Docker\ndocker compose up -d\n\n# API\nWe use OpenAPI 3.0. Specs are in api/openapi.yaml. Generate server code with oapi-codegen.\n\n# Git\nUse conventional commits. Feature branches off main. Squash merge PRs.\n```",
+      "expected_output": "A cleaned-up CLAUDE.md that removes redundant emphasis, eliminates the codebase tour, consolidates testing instructions into one clear line, removes instructions Claude would follow anyway (Go conventions), and keeps only what Claude needs to know that it cannot infer from code.",
+      "files": []
+    }
+  ]
+}
