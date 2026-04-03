@@ -3,21 +3,332 @@
   "evals": [
     {
       "id": 1,
+      "name": "simple-ts-react-from-scratch",
       "prompt": "I just started a new TypeScript + React project with Vite. We use pnpm, vitest for testing, and biome for linting. The project is at early stage with just a few components. Can you help me set up a CLAUDE.md so Claude knows how to work with this project?",
-      "expected_output": "A concise CLAUDE.md file under 200 lines with pnpm/vitest/biome commands, TypeScript conventions, React patterns, and verification instructions. Should not teach TypeScript basics.",
-      "files": []
+      "expected_output": "A concise CLAUDE.md file under 200 lines with pnpm/vitest/biome commands, TypeScript conventions, React patterns, and verification instructions. Should not teach TypeScript basics or list every file in the project.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "claude-md-under-200-lines",
+          "type": "line_count",
+          "target_file": "CLAUDE.md",
+          "max": 200,
+          "description": "CLAUDE.md must be under 200 lines per official best practices"
+        },
+        {
+          "name": "contains-pnpm-command",
+          "type": "content_match",
+          "target_file": "CLAUDE.md",
+          "pattern": "pnpm",
+          "description": "Must include pnpm as package manager"
+        },
+        {
+          "name": "contains-vitest-command",
+          "type": "content_match",
+          "target_file": "CLAUDE.md",
+          "pattern": "vitest",
+          "description": "Must include vitest test command"
+        },
+        {
+          "name": "contains-biome-command",
+          "type": "content_match",
+          "target_file": "CLAUDE.md",
+          "pattern": "biome",
+          "description": "Must include biome linting"
+        },
+        {
+          "name": "no-codebase-tour",
+          "type": "content_absent",
+          "target_file": "CLAUDE.md",
+          "patterns": [
+            "src/components/",
+            "src/pages/",
+            "src/utils/",
+            "file-by-file"
+          ],
+          "description": "Should not include a codebase tour listing every directory"
+        },
+        {
+          "name": "no-teaching-basics",
+          "type": "content_absent",
+          "target_file": "CLAUDE.md",
+          "patterns": ["TypeScript is a", "React is a", "what is JSX"],
+          "description": "Should not teach language/framework basics"
+        },
+        {
+          "name": "single-file-output",
+          "type": "file_count",
+          "max": 1,
+          "description": "Simple project should produce only CLAUDE.md, not rules/agents files"
+        }
+      ]
     },
     {
       "id": 2,
+      "name": "python-monorepo-multi-file",
       "prompt": "We have a large Python monorepo with 3 services: api-gateway (FastAPI), ml-pipeline (PyTorch), and data-ingestion (Airflow). Each service has its own test suite and different coding conventions. The api-gateway uses black+ruff, ml-pipeline uses a more relaxed style. We deploy via GitHub Actions. I need CLAUDE.md plus rules files scoped to each service, and maybe an agent for code review.",
-      "expected_output": "Multiple files: a root CLAUDE.md under 200 lines with shared conventions, path-scoped .claude/rules/ files for each service, and a code-reviewer agent definition. Rules should reflect the different conventions per service.",
-      "files": []
+      "expected_output": "Multiple files: a root CLAUDE.md under 200 lines with shared conventions, path-scoped .claude/rules/ files for each service with correct paths frontmatter, and a code-reviewer agent definition with proper YAML frontmatter.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "claude-md-under-200-lines",
+          "type": "line_count",
+          "target_file": "CLAUDE.md",
+          "max": 200,
+          "description": "Root CLAUDE.md must be under 200 lines"
+        },
+        {
+          "name": "has-rules-files",
+          "type": "file_exists",
+          "pattern": ".claude/rules/*.md",
+          "min_count": 2,
+          "description": "Must create at least 2 path-scoped rules files for different services"
+        },
+        {
+          "name": "rules-have-paths-frontmatter",
+          "type": "content_match",
+          "target_pattern": ".claude/rules/*.md",
+          "pattern": "paths:",
+          "description": "Rules files must have paths: frontmatter for path scoping"
+        },
+        {
+          "name": "has-agent-file",
+          "type": "file_exists",
+          "pattern": ".claude/agents/*.md",
+          "min_count": 1,
+          "description": "Must create at least one agent definition"
+        },
+        {
+          "name": "agent-has-valid-frontmatter",
+          "type": "content_match",
+          "target_pattern": ".claude/agents/*.md",
+          "pattern": "name:",
+          "description": "Agent file must have YAML frontmatter with name field"
+        },
+        {
+          "name": "agent-has-description",
+          "type": "content_match",
+          "target_pattern": ".claude/agents/*.md",
+          "pattern": "description:",
+          "description": "Agent file must have description field for delegation trigger"
+        },
+        {
+          "name": "agent-has-tools",
+          "type": "content_match",
+          "target_pattern": ".claude/agents/*.md",
+          "pattern": "tools:",
+          "description": "Agent file must specify allowed tools"
+        },
+        {
+          "name": "no-duplicate-rules",
+          "type": "custom",
+          "description": "Rules in .claude/rules/ should not duplicate content already in CLAUDE.md (DRY)"
+        }
+      ]
     },
     {
       "id": 3,
+      "name": "review-bloated-claudemd",
       "prompt": "I already have this CLAUDE.md but Claude keeps ignoring the testing instructions and the file feels bloated. Can you review and fix it?\n\n```\n# Project\nThis is a Go microservice for processing payments.\n\n# Build\ngo build ./...\n\n# Test\ngo test ./...\nALWAYS run tests before committing.\nALWAYS run tests after making changes.\nNEVER skip tests.\nIMPORTANT: Tests must pass.\nCRITICAL: Do not commit without testing.\n\n# Code Style\nWe use Go. Follow Go conventions. Write clean code. Use proper error handling. Make sure your code is readable. Don't write bad code. Always use meaningful variable names. Follow the Go style guide. Use gofmt. Use golangci-lint.\n\n# Architecture\nThe project uses a hexagonal architecture pattern. The domain logic is in internal/domain/. The ports are in internal/ports/. The adapters are in internal/adapters/. The HTTP handlers are in internal/adapters/http/. The database adapters are in internal/adapters/postgres/. The service layer is in internal/service/. The configuration is in internal/config/. The main entry point is in cmd/server/main.go. The migrations are in migrations/. The API specs are in api/.\n\n# Database\nWe use PostgreSQL. Migrations are managed with golang-migrate. Run migrations with: migrate -path migrations -database $DATABASE_URL up\n\n# Docker\ndocker compose up -d\n\n# API\nWe use OpenAPI 3.0. Specs are in api/openapi.yaml. Generate server code with oapi-codegen.\n\n# Git\nUse conventional commits. Feature branches off main. Squash merge PRs.\n```",
       "expected_output": "A cleaned-up CLAUDE.md that removes redundant emphasis, eliminates the codebase tour, consolidates testing instructions into one clear line, removes instructions Claude would follow anyway (Go conventions), and keeps only what Claude needs to know that it cannot infer from code.",
-      "files": []
+      "files": [],
+      "assertions": [
+        {
+          "name": "shorter-than-original",
+          "type": "line_count",
+          "target_file": "CLAUDE.md",
+          "max": 30,
+          "description": "Optimized file should be significantly shorter than the ~35-line bloated original"
+        },
+        {
+          "name": "no-redundant-emphasis",
+          "type": "content_absent",
+          "target_file": "CLAUDE.md",
+          "patterns": ["ALWAYS", "NEVER", "CRITICAL"],
+          "description": "Should remove or reduce redundant ALL-CAPS emphasis"
+        },
+        {
+          "name": "no-codebase-tour",
+          "type": "content_absent",
+          "target_file": "CLAUDE.md",
+          "patterns": [
+            "internal/domain/",
+            "internal/ports/",
+            "internal/adapters/http/",
+            "internal/adapters/postgres/",
+            "internal/service/",
+            "internal/config/"
+          ],
+          "description": "Should remove the directory-by-directory architecture tour"
+        },
+        {
+          "name": "no-self-evident-rules",
+          "type": "content_absent",
+          "target_file": "CLAUDE.md",
+          "patterns": [
+            "Write clean code",
+            "Don't write bad code",
+            "meaningful variable names",
+            "Make sure your code is readable"
+          ],
+          "description": "Should remove self-evident instructions Claude follows by default"
+        },
+        {
+          "name": "keeps-useful-commands",
+          "type": "content_match",
+          "target_file": "CLAUDE.md",
+          "pattern": "go test",
+          "description": "Must preserve the actual build/test commands"
+        },
+        {
+          "name": "keeps-migration-command",
+          "type": "content_match",
+          "target_file": "CLAUDE.md",
+          "pattern": "migrate",
+          "description": "Must preserve the database migration command (non-obvious)"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "migrate-from-cursorrules",
+      "prompt": "I've been using Cursor and have a .cursorrules file. I'm switching to Claude Code and want to migrate my setup. Here's my .cursorrules:\n\n```\nYou are an expert in TypeScript, Node.js, Next.js App Router, React, Shadcn UI, Radix UI, Tailwind.\n\nKey Principles:\n- Write concise, technical TypeScript code with accurate examples.\n- Use functional and declarative programming patterns; avoid classes.\n- Prefer iteration and modularization over code duplication.\n- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).\n\nNaming Conventions:\n- Use lowercase with dashes for directories (e.g., components/auth-wizard).\n- Favor named exports for components.\n\nTypeScript Usage:\n- Use TypeScript for all code; prefer interfaces over types.\n- Avoid enums; use maps instead.\n- Use functional components with TypeScript interfaces.\n\nSyntax and Formatting:\n- Use the 'function' keyword for pure functions.\n- Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements.\n\nUI and Styling:\n- Use Shadcn UI, Radix, and Tailwind for components and styling.\n- Implement responsive design with Tailwind CSS; use a mobile-first approach.\n\nPerformance Optimization:\n- Minimize 'use client', 'useEffect', and 'setState'; favor React Server Components (RSC).\n- Wrap client components in Suspense with fallback.\n- Use dynamic loading for non-critical components.\n- Optimize images: use WebP format, include size data, implement lazy loading.\n```\n\nCan you turn this into a proper Claude Code setup?",
+      "expected_output": "A CLAUDE.md that keeps the genuinely useful rules (naming, TypeScript preferences, performance patterns) while removing things Claude already knows (standard TS/React patterns). Should NOT just copy the .cursorrules verbatim. Should add build/test commands that were missing from .cursorrules. May suggest rules files if appropriate.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "claude-md-under-200-lines",
+          "type": "line_count",
+          "target_file": "CLAUDE.md",
+          "max": 200,
+          "description": "CLAUDE.md must be under 200 lines"
+        },
+        {
+          "name": "not-verbatim-copy",
+          "type": "custom",
+          "description": "Output should NOT be a verbatim copy of .cursorrules content -- it should be restructured for Claude Code format"
+        },
+        {
+          "name": "removes-teaching-content",
+          "type": "content_absent",
+          "target_file": "CLAUDE.md",
+          "patterns": ["You are an expert in", "Key Principles"],
+          "description": "Should remove role-playing preamble and generic principle headers from .cursorrules"
+        },
+        {
+          "name": "keeps-project-specific-conventions",
+          "type": "content_match",
+          "target_file": "CLAUDE.md",
+          "pattern": "lowercase with dashes",
+          "description": "Should preserve genuinely non-obvious project conventions like directory naming"
+        },
+        {
+          "name": "adds-verification-commands",
+          "type": "content_match",
+          "target_file": "CLAUDE.md",
+          "pattern": "test|lint|typecheck|build",
+          "description": "Should add build/test/lint commands that were missing from .cursorrules"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "rust-project-with-imports",
+      "prompt": "I have a Rust workspace with 4 crates. There's already a README.md with architecture docs and a CONTRIBUTING.md with git workflow. I don't want to duplicate that info in CLAUDE.md -- can you set it up so CLAUDE.md just imports those files and adds the stuff Claude specifically needs?",
+      "expected_output": "A CLAUDE.md that uses @README.md and @CONTRIBUTING.md import syntax to reference existing docs, and only adds Claude-specific instructions (cargo commands, test commands, workspace-specific quirks). Should be very short since most content is imported.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "uses-import-syntax",
+          "type": "content_match",
+          "target_file": "CLAUDE.md",
+          "pattern": "@README",
+          "description": "Must use @import syntax to reference README.md"
+        },
+        {
+          "name": "uses-contributing-import",
+          "type": "content_match",
+          "target_file": "CLAUDE.md",
+          "pattern": "@CONTRIBUTING",
+          "description": "Must use @import syntax to reference CONTRIBUTING.md"
+        },
+        {
+          "name": "very-short",
+          "type": "line_count",
+          "target_file": "CLAUDE.md",
+          "max": 50,
+          "description": "With imports handling most content, CLAUDE.md itself should be very short"
+        },
+        {
+          "name": "has-cargo-commands",
+          "type": "content_match",
+          "target_file": "CLAUDE.md",
+          "pattern": "cargo",
+          "description": "Must include cargo build/test/clippy commands"
+        },
+        {
+          "name": "no-architecture-duplication",
+          "type": "custom",
+          "description": "Should NOT repeat architecture info that's already in README.md -- the import handles that"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "add-agent-to-existing-setup",
+      "prompt": "I already have a solid CLAUDE.md and some rules files. I want to add a security-review agent that can check PRs for common vulnerabilities -- SQL injection, XSS, hardcoded secrets, insecure deserialization. It should be read-only (no file edits) and use the opus model for deeper analysis. Can you create just the agent file?",
+      "expected_output": "A single .claude/agents/security-reviewer.md file with correct YAML frontmatter (name, description, tools restricted to read-only, model: opus) and a focused system prompt covering the specified vulnerability categories.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "creates-agent-file-only",
+          "type": "file_count",
+          "max": 1,
+          "description": "Should only create the agent file, not modify existing CLAUDE.md or rules"
+        },
+        {
+          "name": "has-name-field",
+          "type": "content_match",
+          "target_file": ".claude/agents/security-reviewer.md",
+          "pattern": "name:",
+          "description": "Must have name field in frontmatter"
+        },
+        {
+          "name": "has-description-field",
+          "type": "content_match",
+          "target_file": ".claude/agents/security-reviewer.md",
+          "pattern": "description:",
+          "description": "Must have description field"
+        },
+        {
+          "name": "read-only-tools",
+          "type": "content_match",
+          "target_file": ".claude/agents/security-reviewer.md",
+          "pattern": "tools:",
+          "description": "Must specify tool restrictions"
+        },
+        {
+          "name": "no-write-tools",
+          "type": "content_absent",
+          "target_file": ".claude/agents/security-reviewer.md",
+          "patterns": ["Write", "Edit"],
+          "description": "Should NOT include Write or Edit in tools list (read-only requirement)"
+        },
+        {
+          "name": "uses-opus-model",
+          "type": "content_match",
+          "target_file": ".claude/agents/security-reviewer.md",
+          "pattern": "opus",
+          "description": "Must set model to opus as requested"
+        },
+        {
+          "name": "covers-requested-vulns",
+          "type": "content_match",
+          "target_file": ".claude/agents/security-reviewer.md",
+          "pattern": "injection|XSS|secrets|deserialization",
+          "description": "System prompt must address the vulnerability categories the user specified"
+        }
+      ]
     }
   ]
 }
